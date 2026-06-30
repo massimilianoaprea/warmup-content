@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galleria — Warm Up Contest</title>
+<meta name="description" content="Le immagini delle edizioni del Warm Up Contest.">
+<link rel="stylesheet" href="style.css">
+<style>
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;}
+  .tab{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:.9rem;
+    padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--navy);cursor:pointer;}
+  .tab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+  .gallery figure{margin:0;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#fff;cursor:pointer;aspect-ratio:4/3;}
+  .gallery img{width:100%;height:100%;object-fit:cover;transition:transform .2s;}
+  .gallery figure:hover img{transform:scale(1.05);}
+  .empty{background:var(--mist);border:1px dashed var(--line);border-radius:14px;padding:40px;text-align:center;color:var(--grigio);}
+  .lightbox{position:fixed;inset:0;background:rgba(7,18,40,.92);display:none;place-items:center;z-index:300;padding:20px;}
+  .lightbox.open{display:grid;}
+  .lightbox img{max-width:92vw;max-height:82vh;border-radius:8px;}
+  .lightbox button{position:absolute;background:rgba(255,255,255,.12);color:#fff;border:none;font-size:2rem;
+    width:54px;height:54px;border-radius:50%;cursor:pointer;}
+  .lb-close{top:18px;right:18px;}
+  .lb-prev{left:14px;top:50%;transform:translateY(-50%);}
+  .lb-next{right:14px;top:50%;transform:translateY(-50%);}
+  .lb-cap{position:absolute;bottom:20px;left:0;right:0;text-align:center;color:#cdddf6;font-size:.9rem;}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="b1">WARM UP CONTEST</span><span class="b2">9ª ed.</span></a>
+    <button class="nav-toggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="partecipare.html">Partecipare</a></li>
+      <li><a href="galleria.html" class="active">Galleria</a></li>
+      <li><a href="index.html#contatti">Contatti</a></li>
+      <li><a href="scheda-adesione.html" class="nav-cta">Area iscritti</a></li>
+    </ul>
+  </nav>
+</header>
+
+<section class="hero" style="padding:0;">
+  <div class="wrap" style="padding-top:56px;padding-bottom:48px;">
+    <span class="eyebrow">Galleria</span>
+    <h1 style="font-size:clamp(2.2rem,6vw,3.6rem);">Le edizioni in campo</h1>
+    <p class="lead">Momenti dalle edizioni passate del Warm Up Contest.</p>
+  </div>
+</section>
+<hr class="court-rule">
+
+<section>
+  <div class="wrap">
+    <div class="tabs" id="tabs"></div>
+    <div class="gallery" id="gallery"></div>
+    <div class="empty" id="empty" hidden>
+      Le foto saranno disponibili a breve. Per aggiungerle: metti le immagini nelle cartelle <code>img/galleria/&lt;anno&gt;/</code> e lancia <code>node scripts/genera-galleria.mjs</code>.
+    </div>
+  </div>
+</section>
+
+<footer class="footer" id="contatti">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h4>Warm Up Contest</h4>
+        <p>Torneo pre-season di pallavolo riconosciuto FIPAV.<br>9ª edizione · 2-4 ottobre 2026 · Tagliacozzo (AQ).</p>
+        <p class="social">
+          <a href="https://www.facebook.com/" target="_blank" rel="noopener">Facebook</a>
+          <a href="https://instagram.com/warmupcontest1" target="_blank" rel="noopener">Instagram</a>
+        </p>
+      </div>
+      <div>
+        <h4>Contatti</h4>
+        <p>320 4117503<br>328 5771602<br><a href="mailto:warmupcontest1@gmail.com">warmupcontest1@gmail.com</a></p>
+      </div>
+      <div>
+        <h4>Link</h4>
+        <p><a href="index.html">Home</a><br><a href="partecipare.html">Partecipare</a><br><a href="scheda-adesione.html">Area iscritti</a></p>
+      </div>
+    </div>
+    <p class="legal">© 2026 Warm Up Contest · Vivi il gioco. Vinci insieme.</p>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <button class="lb-close" aria-label="Chiudi">✕</button>
+  <button class="lb-prev" aria-label="Precedente">‹</button>
+  <img id="lbImg" alt="">
+  <button class="lb-next" aria-label="Successiva">›</button>
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+
+<a class="wa-float" href="https://wa.me/393204117503" target="_blank" rel="noopener" aria-label="Scrivici su WhatsApp">💬</a>
+
+<script>
+const $ = s => document.querySelector(s);
+const t=$('.nav-toggle'), m=$('.nav-links');
+t&&t.addEventListener('click',()=>{const o=m.classList.toggle('open');t.setAttribute('aria-expanded',String(o));});
+
+let FOTO=[], EDIZIONI={}, filtro="tutte", visibili=[];
+
+fetch('galleria.json').then(r=>r.json()).then(d=>{
+  EDIZIONI=d.edizioni||{}; FOTO=d.foto||[];
+  render();
+}).catch(()=>{ render(); });
+
+function etichetta(anno){ const e=EDIZIONI[anno]; return e ? `${anno} · ${e} ed.` : anno; }
+
+function render(){
+  const anni=[...new Set(FOTO.map(f=>f.anno))].sort().reverse();
+  if(!FOTO.length){ $('#empty').hidden=false; $('#tabs').innerHTML=''; $('#gallery').innerHTML=''; return; }
+  $('#empty').hidden=true;
+  $('#tabs').innerHTML = [`<button class="tab ${filtro==='tutte'?'active':''}" data-f="tutte">Tutte</button>`]
+    .concat(anni.map(a=>`<button class="tab ${filtro===a?'active':''}" data-f="${a}">${etichetta(a)}</button>`)).join('');
+  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{ filtro=b.dataset.f; render(); }));
+
+  visibili = (filtro==='tutte') ? FOTO : FOTO.filter(f=>f.anno===filtro);
+  $('#gallery').innerHTML = visibili.map((f,i)=>`
+    <figure data-i="${i}"><img src="${f.file}" alt="${f.titolo||'Warm Up Contest '+f.anno}" loading="lazy"></figure>`).join('');
+  document.querySelectorAll('.gallery figure').forEach(fig=>fig.addEventListener('click',()=>apri(+fig.dataset.i)));
+}
+
+let cur=0;
+function apri(i){ cur=i; mostra(); $('#lightbox').classList.add('open'); }
+function mostra(){ const f=visibili[cur]; $('#lbImg').src=f.file; $('#lbCap').textContent=(f.titolo?f.titolo+' · ':'')+etichetta(f.anno); }
+function chiudi(){ $('#lightbox').classList.remove('open'); }
+$('.lb-close').addEventListener('click',chiudi);
+$('.lb-prev').addEventListener('click',()=>{ cur=(cur-1+visibili.length)%visibili.length; mostra(); });
+$('.lb-next').addEventListener('click',()=>{ cur=(cur+1)%visibili.length; mostra(); });
+$('#lightbox').addEventListener('click',e=>{ if(e.target.id==='lightbox') chiudi(); });
+document.addEventListener('keydown',e=>{ if(!$('#lightbox').classList.contains('open'))return;
+  if(e.key==='Escape')chiudi(); if(e.key==='ArrowLeft')$('.lb-prev').click(); if(e.key==='ArrowRight')$('.lb-next').click(); });
+</script>
+</body>
+</html>

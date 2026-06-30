@@ -3,228 +3,174 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partecipare — Warm Up Contest</title>
-
-<!-- PapaParse: legge i CSV di Google in modo robusto (gestisce virgole, virgolette, ecc.) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
-<!-- ============================================================
-     STILI SEGNAPOSTO
-     Questi stili servono solo a far vedere la pagina funzionante.
-     Quando la inserisci nel tuo sito, sostituiscili (o togli questo
-     blocco <style>) e usa il foglio di stile del tuo sito.
-     ============================================================ -->
-<style>
-  :root{
-    --blu:#0b3d91; --blu-chiaro:#1565c0; --giallo:#f4b400;
-    --testo:#1a1a1a; --grigio:#5b6470; --bordo:#e3e7ee; --sfondo:#f7f9fc;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-    color:var(--testo); background:var(--sfondo); line-height:1.55;
-  }
-  .wrap{max-width:980px; margin:0 auto; padding:24px 20px 64px;}
-
-  header.hero{text-align:center; padding:40px 16px 24px;}
-  header.hero .eyebrow{
-    display:inline-block; font-size:.8rem; letter-spacing:.12em; text-transform:uppercase;
-    color:var(--blu-chiaro); font-weight:700; margin-bottom:10px;
-  }
-  header.hero h1{margin:.1em 0; font-size:clamp(2rem,6vw,3.2rem); color:var(--blu); line-height:1.05;}
-  header.hero .meta{color:var(--grigio); font-size:1.05rem; margin-top:8px;}
-  header.hero .badge{
-    display:inline-block; margin-top:14px; background:var(--giallo); color:#3a2c00;
-    font-weight:700; font-size:.85rem; padding:6px 14px; border-radius:999px;
-  }
-
-  .intro{font-size:1.12rem; color:#2b313a; max-width:70ch; margin:8px auto 36px;}
-
-  h2{font-size:1.35rem; color:var(--blu); margin:40px 0 14px; padding-bottom:8px; border-bottom:2px solid var(--bordo);}
-
-  .categorie{display:flex; flex-wrap:wrap; gap:10px; padding:0; list-style:none; margin:0;}
-  .categorie li{
-    background:#fff; border:1px solid var(--bordo); border-radius:10px;
-    padding:10px 14px; min-width:0;
-  }
-  .categorie .cat{font-weight:700;}
-  .categorie .gen{color:var(--grigio); font-size:.9rem;}
-
-  .formule{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-top:6px;}
-  .formula{
-    background:#fff; border:1px solid var(--bordo); border-radius:14px; padding:20px;
-    display:flex; flex-direction:column;
-  }
-  .formula h3{margin:0 0 6px; font-size:1.25rem; color:var(--blu);}
-  .formula .prezzo{font-size:1.6rem; font-weight:800; color:var(--blu-chiaro); margin:4px 0 10px;}
-  .formula p{margin:0 0 10px; color:#333;}
-  .formula .note{margin-top:auto; font-size:.85rem; color:var(--grigio);}
-
-  .nota-box{
-    background:#fff; border:1px solid var(--bordo); border-left:4px solid var(--giallo);
-    border-radius:10px; padding:16px 18px; margin-top:18px; color:#333;
-  }
-
-  /* Avviso che indica se i dati sono di esempio o dal foglio reale */
-  .stato{
-    font-size:.82rem; text-align:center; color:var(--grigio);
-    margin-top:40px; padding-top:16px; border-top:1px dashed var(--bordo);
-  }
-  .stato.live{color:#137333;}
-  .stato.errore{color:#b00020;}
-
-  @media (prefers-reduced-motion: no-preference){
-    .formula, .categorie li{transition:transform .15s ease, box-shadow .15s ease;}
-    .formula:hover{transform:translateY(-2px); box-shadow:0 6px 20px rgba(11,61,145,.08);}
-  }
-</style>
+<title>Partecipare — Warm Up Contest 2026</title>
+<meta name="description" content="Categorie, formule TOP/ELITE/MATCH, requisiti, quote e gratuità, e come iscrivere la squadra al Warm Up Contest 2026.">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="wrap">
-  <header class="hero">
-    <span class="eyebrow" id="edizione">…</span>
-    <h1 id="titolo">…</h1>
-    <div class="meta"><span id="date">…</span> · <span id="luogo">…</span></div>
-    <span class="badge" id="riconoscimento" hidden></span>
-  </header>
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="index.html"><span class="b1">WARM UP CONTEST</span><span class="b2">9ª ed.</span></a>
+    <button class="nav-toggle" aria-label="Menu" aria-expanded="false">☰</button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="partecipare.html" class="active">Partecipare</a></li>
+      <li><a href="galleria.html">Galleria</a></li>
+      <li><a href="index.html#contatti">Contatti</a></li>
+      <li><a href="scheda-adesione.html" class="nav-cta">Area iscritti</a></li>
+    </ul>
+  </nav>
+</header>
 
-  <p class="intro" id="intro">…</p>
+<section class="hero" style="padding:0;">
+  <div class="wrap" style="padding-top:56px;padding-bottom:48px;">
+    <span class="eyebrow">Partecipare</span>
+    <h1 style="font-size:clamp(2.2rem,6vw,3.6rem);">Iscrivi la tua squadra</h1>
+    <p class="lead">Tutto quello che serve sapere su categorie, formule, quote e iscrizione.</p>
+  </div>
+</section>
+<hr class="court-rule">
 
-  <h2>Categorie ammesse</h2>
-  <ul class="categorie" id="categorie"></ul>
+<!-- categorie -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Informazioni tecniche</span>
+      <h2>Categorie partecipanti</h2>
+    </div>
+    <ul class="checklist" style="columns:2;max-width:560px;">
+      <li>Under 19 M/F</li>
+      <li>1ª e 2ª Divisione M/F</li>
+      <li>Serie D M/F</li>
+      <li>Serie C M/F</li>
+    </ul>
+    <p style="color:var(--grigio);margin-top:16px;">La formula Under 19 è riservata a un massimo di 4 squadre, per garantire la qualità del torneo. Tornei OPEN con minimo 3 partite garantite per squadra e arbitraggio federale FIPAV su 5 campi di gioco.</p>
+  </div>
+</section>
 
-  <h2>Formule di partecipazione</h2>
-  <div class="formule" id="formule"></div>
+<!-- formule -->
+<section class="section-mist">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Formule di partecipazione</span>
+      <h2>TOP · ELITE · MATCH</h2>
+      <p>Quote per atleta, comprensive di vitto e alloggio e tassa di soggiorno. Tariffa ridotta per allenatori e dirigenti.</p>
+    </div>
+    <div class="grid grid-3">
+      <article class="formula">
+        <header><div class="name">TOP</div><div class="price">€ 175<small> / atleta</small></div></header>
+        <ul>
+          <li>2 giorni pensione completa (cena venerdì → pranzo domenica)</li>
+          <li>Allenamento venerdì</li>
+          <li>Torneo</li>
+          <li>Premiazione</li>
+          <li>Gadget ufficiale</li>
+        </ul>
+        <div class="staff">Allenatore / dirigente € 150</div>
+      </article>
+      <article class="formula">
+        <header><div class="name">ELITE</div><div class="price">€ 135<small> / atleta</small></div></header>
+        <ul>
+          <li>1 giorno pensione completa (pranzo sabato → pranzo domenica)</li>
+          <li>Allenamento sabato mattina</li>
+          <li>Torneo</li>
+          <li>Premiazione</li>
+          <li>Gadget ufficiale</li>
+        </ul>
+        <div class="staff">Allenatore / dirigente € 110</div>
+      </article>
+      <article class="formula">
+        <header><div class="name">MATCH</div><div class="price">€ 115<small> / atleta</small></div></header>
+        <ul>
+          <li>1 giorno pensione completa (dalla cena del sabato)</li>
+          <li>Torneo</li>
+          <li>Premiazione</li>
+          <li>Gadget ufficiale</li>
+        </ul>
+        <div class="staff">Allenatore / dirigente € 90</div>
+      </article>
+    </div>
+    <p style="margin-top:18px;color:var(--grigio);font-size:.92rem;">Le iscrizioni con formule TOP ed ELITE, con allenamento, sono assegnate fino a esaurimento della disponibilità degli spazi palestra.</p>
+  </div>
+</section>
 
-  <div class="nota-box" id="note" hidden></div>
+<!-- requisiti + quote -->
+<section>
+  <div class="wrap">
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:start;">
+      <div class="card">
+        <span class="eyebrow">Requisiti squadra</span>
+        <ul class="checklist" style="margin-top:14px;">
+          <li>Minimo 10 atleti per squadra</li>
+          <li>Tesseramento FIPAV in regola</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="eyebrow">Quote e gratuità</span>
+        <ul class="checklist" style="margin-top:14px;">
+          <li>Le quote comprendono vitto e alloggio, tassa di soggiorno, partecipazione, premiazioni e gadget</li>
+          <li>Una gratuità ogni 20 partecipanti iscritti</li>
+          <li>Supplemento di € 15 per atleta in caso di iscrizione combinata U19 + Open</li>
+          <li>Accompagnatori non tesserati: € 75 al giorno (strutture convenzionate)</li>
+        </ul>
+      </div>
+    </div>
+    <p style="color:var(--grigio);margin-top:18px;">Posti limitati: partecipazione e accesso agli allenamenti garantiti fino a esaurimento. Conviene iscriversi il prima possibile.</p>
+  </div>
+</section>
 
-  <p class="stato" id="stato">Caricamento contenuti…</p>
-</div>
+<!-- come iscriversi -->
+<section class="section-navy" id="iscrizione">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Iscrizione</span>
+      <h2>Come iscrivere la squadra</h2>
+      <p>Nessun pagamento online: la quota si versa con bonifico e l'iscrizione si perfeziona alla conferma.</p>
+    </div>
+    <div class="steps">
+      <div class="step" style="background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);"><div><h3 style="color:#fff;">Compila il modulo</h3><p style="color:#c4d2ec;">Scarica il modulo, indica società, categoria e formula, e invialo a warmupcontest1@gmail.com.</p></div></div>
+      <div class="step" style="background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);"><div><h3 style="color:#fff;">Versa la quota</h3><p style="color:#c4d2ec;">Effettua il bonifico secondo le indicazioni ricevute dall'organizzazione.</p></div></div>
+      <div class="step" style="background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);"><div><h3 style="color:#fff;">Ricevi la conferma</h3><p style="color:#c4d2ec;">Verificato il pagamento, ricevi conferma e codice di accesso all'area iscritti.</p></div></div>
+      <div class="step" style="background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);"><div><h3 style="color:#fff;">Compila la scheda adesione</h3><p style="color:#c4d2ec;">Inserisci i partecipanti, calcola il costo definitivo e salva il preventivo in PDF.</p></div></div>
+    </div>
+    <div class="cta-row" style="margin-top:26px;">
+      <a class="btn btn-gold" href="documenti/modulo-iscrizione-2026.docx">Scarica il modulo</a>
+      <a class="btn btn-wa" href="https://wa.me/393204117503" target="_blank" rel="noopener">💬 Scrivici su WhatsApp</a>
+      <a class="btn btn-outline" href="scheda-adesione.html">Area iscritti</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer" id="contatti">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h4>Warm Up Contest</h4>
+        <p>Torneo pre-season di pallavolo riconosciuto FIPAV.<br>9ª edizione · 2-4 ottobre 2026 · Tagliacozzo (AQ).</p>
+        <p class="social">
+          <a href="https://www.facebook.com/" target="_blank" rel="noopener">Facebook</a>
+          <a href="https://instagram.com/warmupcontest1" target="_blank" rel="noopener">Instagram</a>
+        </p>
+      </div>
+      <div>
+        <h4>Contatti</h4>
+        <p>320 4117503<br>328 5771602<br><a href="mailto:warmupcontest1@gmail.com">warmupcontest1@gmail.com</a><br><a href="https://www.warmupeventi.it" target="_blank" rel="noopener">www.warmupeventi.it</a></p>
+      </div>
+      <div>
+        <h4>Link</h4>
+        <p><a href="index.html">Home</a><br><a href="galleria.html">Galleria</a><br><a href="scheda-adesione.html">Area iscritti</a><br><a href="documenti/brochure-warmup-2026.pdf" target="_blank">Brochure (PDF)</a></p>
+      </div>
+    </div>
+    <p class="legal">© 2026 Warm Up Contest · Vivi il gioco. Vinci insieme.</p>
+  </div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/393204117503" target="_blank" rel="noopener" aria-label="Scrivici su WhatsApp">💬</a>
 
 <script>
-/* ================================================================
-   CONFIGURAZIONE — l'unica parte da toccare
-   Incolla qui i link CSV "Pubblica sul web" di ciascuna scheda
-   del tuo foglio Google (istruzioni nella chat).
-   Finché restano vuoti "", la pagina mostra i dati di esempio.
-   ================================================================ */
-const CONFIG = {
-  csv: {
-    testi:      "",   // <-- link CSV della scheda "testi"
-    formule:    "",   // <-- link CSV della scheda "formule"
-    categorie:  ""    // <-- link CSV della scheda "categorie"
-  }
-};
-
-/* ----- Dati di esempio (usati finché i link sopra sono vuoti) ----- */
-const SAMPLE = {
-  testi: [
-    {chiave:"titolo", valore:"Warm Up Contest"},
-    {chiave:"edizione", valore:"9ª edizione"},
-    {chiave:"date", valore:"2-4 ottobre 2026"},
-    {chiave:"luogo", valore:"Villaggio dello Sport, Tagliacozzo (AQ)"},
-    {chiave:"intro", valore:"Questo è un testo di esempio. Collega il foglio Google per mostrare i contenuti reali."},
-    {chiave:"riconoscimento", valore:"Torneo riconosciuto FIPAV"},
-    {chiave:"note", valore:"Nota di esempio: qui andranno scadenze iscrizioni, requisiti e contatti."}
-  ],
-  formule: [
-    {nome:"TOP",   descrizione:"Descrizione di esempio della formula TOP.",   prezzo:"€ —", note:"Esempio"},
-    {nome:"ELITE", descrizione:"Descrizione di esempio della formula ELITE.", prezzo:"€ —", note:"Esempio"},
-    {nome:"MATCH", descrizione:"Descrizione di esempio della formula MATCH.", prezzo:"€ —", note:"Esempio"}
-  ],
-  categorie: [
-    {categoria:"Under 19", genere:"Maschile/Femminile"},
-    {categoria:"1ª Divisione", genere:"Maschile/Femminile"},
-    {categoria:"2ª Divisione", genere:"Maschile/Femminile"},
-    {categoria:"Serie D", genere:"Maschile/Femminile"},
-    {categoria:"Serie C", genere:"Maschile/Femminile"}
-  ]
-};
-
-/* ----- Lettura di un CSV pubblicato da Google ----- */
-function loadCsv(url){
-  return new Promise((resolve, reject)=>{
-    Papa.parse(url, {
-      download:true, header:true, skipEmptyLines:true,
-      complete: res => resolve(res.data),
-      error: err => reject(err)
-    });
-  });
-}
-
-async function getData(key){
-  const url = CONFIG.csv[key];
-  if(!url) return {data: SAMPLE[key], live:false};
-  try{
-    const data = await loadCsv(url);
-    if(!data || !data.length) throw new Error("foglio vuoto");
-    return {data, live:true};
-  }catch(e){
-    console.error("Errore lettura scheda '"+key+"':", e);
-    return {data: SAMPLE[key], live:false, errore:true};
-  }
-}
-
-const el = id => document.getElementById(id);
-const safe = v => (v==null ? "" : String(v).trim());
-
-function renderTesti(rows){
-  const t = Object.fromEntries(rows.map(r => [safe(r.chiave), safe(r.valore)]));
-  el("titolo").textContent   = t.titolo   || "Warm Up Contest";
-  el("edizione").textContent = t.edizione || "";
-  el("date").textContent     = t.date     || "";
-  el("luogo").textContent    = t.luogo    || "";
-  el("intro").textContent    = t.intro    || "";
-  if(t.riconoscimento){ const b=el("riconoscimento"); b.textContent=t.riconoscimento; b.hidden=false; }
-  if(t.note){ const n=el("note"); n.textContent=t.note; n.hidden=false; }
-  document.title = (t.titolo||"Warm Up Contest") + " — Partecipare";
-}
-
-function renderCategorie(rows){
-  el("categorie").innerHTML = rows
-    .filter(r => safe(r.categoria))
-    .map(r => `<li><span class="cat">${safe(r.categoria)}</span>`
-              + (safe(r.genere) ? ` <span class="gen">· ${safe(r.genere)}</span>` : ``)
-              + `</li>`)
-    .join("");
-}
-
-function renderFormule(rows){
-  el("formule").innerHTML = rows
-    .filter(r => safe(r.nome))
-    .map(r => `<article class="formula">
-        <h3>${safe(r.nome)}</h3>
-        ${safe(r.prezzo) ? `<div class="prezzo">${safe(r.prezzo)}</div>` : ``}
-        ${safe(r.descrizione) ? `<p>${safe(r.descrizione)}</p>` : ``}
-        ${safe(r.note) ? `<div class="note">${safe(r.note)}</div>` : ``}
-      </article>`)
-    .join("");
-}
-
-(async function init(){
-  const [testi, formule, categorie] = await Promise.all([
-    getData("testi"), getData("formule"), getData("categorie")
-  ]);
-
-  renderTesti(testi.data);
-  renderCategorie(categorie.data);
-  renderFormule(formule.data);
-
-  const anyLive   = testi.live || formule.live || categorie.live;
-  const anyErrore = testi.errore || formule.errore || categorie.errore;
-  const stato = el("stato");
-  if(anyErrore){
-    stato.className = "stato errore";
-    stato.textContent = "Non sono riuscito a leggere il foglio Google: controlla che sia pubblicato e che i link siano corretti. Intanto vedi i dati di esempio.";
-  }else if(anyLive){
-    stato.className = "stato live";
-    stato.textContent = "Contenuti aggiornati dal foglio Google.";
-  }else{
-    stato.className = "stato";
-    stato.textContent = "Dati di esempio — incolla i link del foglio Google nella sezione CONFIG per mostrare i contenuti reali.";
-  }
-})();
+  const t=document.querySelector('.nav-toggle'), m=document.querySelector('.nav-links');
+  t&&t.addEventListener('click',()=>{const o=m.classList.toggle('open');t.setAttribute('aria-expanded',String(o));});
 </script>
 </body>
 </html>
