@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Area iscritti — Scheda adesione | Warm Up Contest</title>
-<meta name="description" content="Area riservata alle società iscritte e confermate: scheda adesione con calcolo costi e preventivo del Warm Up Contest.">
+<meta name="description" content="Area riservata alle società iscritte e confermate: scheda adesione con dati squadra, lista partecipanti, calcolo costi e preventivo.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0E1729">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,16 +13,16 @@
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="stylesheet" href="css/style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
-  /* --- stili specifici della scheda, costruiti sui token del sito --- */
   .sa-section{padding-top:clamp(90px,12vh,140px)}
   .sa-gate{max-width:460px;margin:0 auto;text-align:center}
-  .sa-gate .field{justify-content:center}
-  .sa input,.sa select,.sa-gate input{
+  .sa input,.sa select,.sa textarea,.sa-gate input{
     font-family:var(--body);font-size:1rem;color:#fff;background:var(--ink-2);
     border:1px solid var(--line);border-radius:var(--radius);padding:11px 12px}
-  .sa input::placeholder{color:#8893a8}
+  .sa input::placeholder,.sa textarea::placeholder{color:#8893a8}
   .sa input[type=file]{padding:8px;color:#cfd8ea}
+  .sa input[type=date]{color-scheme:dark}
   .sa-gate input{width:100%;text-align:center;letter-spacing:.08em;margin:14px 0}
   .sa-msg{min-height:1.2em;font-size:.9rem;color:var(--flame)}
 
@@ -42,25 +42,32 @@
   .sa-tot tr:last-child td{border-bottom:none}
 
   .sa-card{background:var(--ink-3);border:1px solid var(--line);border-radius:var(--radius-lg);padding:22px;margin-bottom:16px}
-  .sa-card h3{font-family:var(--display);font-variation-settings:"wght" 800,"wdth" 110;color:#fff;font-size:1.15rem;margin:0 0 14px}
-  .sa .field{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:0}
-  .sa .field+.field{margin-top:12px}
+  .sa-card h3{font-family:var(--display);font-variation-settings:"wght" 800,"wdth" 110;color:#fff;font-size:1.15rem;margin:0 0 4px}
+  .sa .grouplabel{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#8e9ab4;margin:16px 0 8px;display:block}
+  .sa .frow{display:flex;gap:10px;flex-wrap:wrap}
+  .sa .frow>*{flex:1 1 180px;min-width:0}
   .sa label{font-weight:600;color:#cfd8ea;font-size:.95rem}
-  .sa .hint{font-family:var(--mono);font-size:.74rem;letter-spacing:.04em;color:#8e9ab4;margin:6px 0 12px}
+  .sa .hint{font-family:var(--mono);font-size:.74rem;letter-spacing:.04em;color:#8e9ab4;margin:6px 0 14px}
   #logoPreview{max-height:54px;border:1px solid var(--line);border-radius:6px;padding:5px;background:#fff;display:none}
 
   .sa-formule{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
-  .sa-formula{border:1px solid var(--line);border-radius:var(--radius-lg);padding:16px;cursor:pointer;background:var(--ink-3)}
+  .sa-formula{position:relative;border:1px solid var(--line);border-radius:var(--radius-lg);padding:16px;cursor:pointer;background:var(--ink-3)}
   .sa-formula.sel{border-color:var(--flame);box-shadow:0 0 0 2px rgba(255,90,31,.32)}
   .sa-formula .nm{font-family:var(--display);font-variation-settings:"wght" 900,"wdth" 110;color:#fff;font-size:1.3rem}
   .sa-formula .pz{display:block;color:var(--ember);font-family:var(--mono);font-size:.86rem;margin-top:4px}
   .sa-formula .ds{display:block;color:#9aa6bf;font-size:.78rem;margin-top:8px}
 
-  .sa-riga{display:grid;grid-template-columns:1.6fr auto auto;gap:8px;align-items:center;margin-bottom:8px}
-  .sa-riga input[type=number]{width:88px}
+  .sa-riga{display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+    border:1px solid var(--line);border-radius:var(--radius);padding:10px;margin-bottom:10px;background:rgba(255,255,255,.02)}
+  .sa-riga .nome{flex:2 1 170px}
+  .sa-riga .data{flex:1 1 140px}
+  .sa-riga .luogo{flex:1 1 150px}
+  .sa-riga .camera,.sa-riga .giorni{flex:1 1 140px}
+  .sa-riga .giorni{flex:0 1 110px}
+  .sa-riga .note{flex:2 1 160px}
   .sa-add{background:transparent;color:var(--ember);border:1px dashed rgba(255,177,46,.5);
     border-radius:var(--radius);padding:10px 14px;font-weight:600;cursor:pointer;margin-top:4px}
-  .sa-del{background:transparent;color:var(--flame);border:1px solid var(--line);
+  .sa-del{flex:0 0 auto;background:transparent;color:var(--flame);border:1px solid var(--line);
     border-radius:var(--radius);padding:9px 11px;cursor:pointer;font-weight:700}
   .sa-warn{color:var(--ember);font-size:.88rem;margin-top:8px}
   .sa-opt{display:flex;gap:10px;align-items:flex-start;color:#cfd8ea}
@@ -91,7 +98,6 @@
 </header>
 
 <main id="main" class="sa">
-
 <section class="section section--dark sa-section">
   <div class="wrap">
     <div class="crumb" style="font-family:var(--mono);font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;color:#8e9ab4;margin-bottom:14px">
@@ -99,11 +105,10 @@
     </div>
     <div class="section__head">
       <span class="eyebrow">Area riservata · scheda adesione</span>
-      <h2 style="color:#fff">Calcola il costo della tua squadra</h2>
+      <h2 style="color:#fff">Compila la scheda della tua squadra</h2>
       <p class="lead">Riservata alle società iscritte e confermate. 9ª edizione · 2-4 ottobre 2026 · Tagliacozzo (AQ).</p>
     </div>
 
-    <!-- GATE -->
     <div class="sa-card sa-gate" id="gate">
       <h3>Inserisci il codice di accesso</h3>
       <p class="hint" style="text-align:center">Lo ricevi via email dopo la conferma dell'iscrizione.</p>
@@ -112,10 +117,8 @@
       <p class="sa-msg" id="gatemsg"></p>
     </div>
 
-    <!-- APP -->
     <div id="app" class="hidden">
 
-      <!-- barra totale fissa -->
       <div class="sa-bar">
         <div class="sa-bar-top">
           <button type="button" class="sa-toggle" id="toggleDett" aria-expanded="false">Dettaglio ▾</button>
@@ -124,13 +127,39 @@
         <div id="dettaglio" hidden><table class="sa-tot" id="riepilogo"></table></div>
       </div>
 
+      <!-- DATI SOCIETÀ + ISCRIZIONE -->
       <div class="sa-card">
         <h3>Società</h3>
-        <div class="field"><label for="societaNome">Nome società</label>
-          <input id="societaNome" type="text" placeholder="Denominazione società / A.S.D." style="flex:1;min-width:220px"></div>
-        <div class="field"><label for="societaLogo">Logo società</label>
-          <input id="societaLogo" type="file" accept="image/*"></div>
+        <span class="grouplabel">Denominazione e logo</span>
+        <div class="frow">
+          <input id="societaNome" type="text" placeholder="Denominazione società / A.S.D." style="flex:2 1 240px">
+          <input id="societaLogo" type="file" accept="image/*" aria-label="Logo società">
+        </div>
         <div style="margin-top:10px"><img id="logoPreview" alt="Anteprima logo società"></div>
+
+        <span class="grouplabel">Categoria</span>
+        <div class="frow">
+          <select id="categoria">
+            <option value="">Categoria…</option>
+            <option>Under 19</option><option>1ª Divisione</option><option>2ª Divisione</option>
+            <option>Serie D</option><option>Serie C</option>
+          </select>
+          <select id="genere"><option value="">Genere…</option><option>Maschile</option><option>Femminile</option></select>
+        </div>
+
+        <span class="grouplabel">Dirigente responsabile</span>
+        <div class="frow">
+          <input id="dirNome" type="text" placeholder="Nome e cognome">
+          <input id="dirCell" type="tel" placeholder="Cellulare">
+          <input id="dirEmail" type="email" placeholder="E-mail">
+        </div>
+
+        <span class="grouplabel">Tecnico</span>
+        <div class="frow">
+          <input id="tecNome" type="text" placeholder="Nome e cognome">
+          <input id="tecCell" type="tel" placeholder="Cellulare">
+          <input id="tecEmail" type="email" placeholder="E-mail">
+        </div>
       </div>
 
       <div class="sa-card">
@@ -140,7 +169,7 @@
 
       <div class="sa-card">
         <h3>Atleti</h3>
-        <p class="hint">Minimo 10 atleti. Camera singola: supplemento € 15 / notte.</p>
+        <p class="hint">Nome, data e luogo di nascita, camera ed eventuali allergie/note. Minimo 10 atleti · camera singola +€15/notte.</p>
         <div id="atleti"></div>
         <button class="sa-add" data-add="atleti">+ Aggiungi atleta</button>
         <p class="sa-warn hidden" id="warnAtleti">Servono almeno 10 atleti per squadra.</p>
@@ -155,7 +184,7 @@
 
       <div class="sa-card">
         <h3>Accompagnatori</h3>
-        <p class="hint">Non tesserati: € 75 / giorno (strutture convenzionate).</p>
+        <p class="hint">Non tesserati: €75/giorno. Indica i giorni di permanenza.</p>
         <div id="accompagnatori"></div>
         <button class="sa-add" data-add="accompagnatori">+ Aggiungi accompagnatore</button>
       </div>
@@ -163,23 +192,24 @@
       <div class="sa-card">
         <h3>Supplementi e sconti</h3>
         <label class="sa-opt"><input type="checkbox" id="u19open">
-          <span>Iscrizione combinata <strong>U19 + Open</strong> (+€ 15 per atleta)</span></label>
-        <div class="field" style="margin-top:14px"><label for="codice">Codice sconto</label>
-          <input id="codice" type="text" placeholder="(facoltativo)" autocomplete="off">
-          <button class="btn btn--ghost" id="applica">Applica</button></div>
+          <span>Iscrizione combinata <strong>U19 + Open</strong> (+€15 per atleta)</span></label>
+        <div class="frow" style="margin-top:14px;align-items:center">
+          <input id="codice" type="text" placeholder="Codice sconto (facoltativo)" style="flex:2 1 200px">
+          <button class="btn btn--ghost" id="applica" style="flex:0 0 auto">Applica</button>
+        </div>
         <div class="sa-codemsg" id="codemsg"></div>
         <p class="hint" style="margin-top:12px">Gratuità automatica: 1 ogni 20 partecipanti iscritti.</p>
       </div>
 
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px">
-        <button class="btn btn--flame" id="stampa">Salva preventivo (PDF)
+        <button class="btn btn--flame" id="stampa">Salva scheda (PDF)
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg></button>
         <a class="btn btn--wa" href="https://wa.me/393204117503" target="_blank" rel="noopener">Scrivici su WhatsApp</a>
         <button class="btn btn--ghost" id="reset">Azzera</button>
       </div>
       <p class="hint" style="margin-top:14px">Quote comprensive di vitto e alloggio + tassa di soggiorno. Preventivo indicativo; il costo definitivo è confermato dall'organizzazione.</p>
 
-    </div><!-- /app -->
+    </div>
   </div>
 </section>
 </main>
@@ -210,10 +240,9 @@
 
 <script src="js/main.js" defer></script>
 <script>
-/* ===== CONFIGURAZIONE ===== */
 const CONFIG = {
   accesso: "WUC2026",
-  whatsapp: "https://wa.me/393204117503",      // <-- sostituisci col link del CANALE WhatsApp
+  whatsapp: "https://wa.me/393204117503",
   sporteam12Logo: "assets/sporteam12-logo.png",
   accompagnatoreGiorno: 75, supplementoSingolaNotte: 15, supplementoU19OpenAtleta: 15,
   gratuitaOgni: 20, minAtleti: 10,
@@ -230,6 +259,7 @@ const CONFIG = {
 
 (function(){
   const $ = s => document.querySelector(s);
+  const val = id => { const e=document.getElementById(id); return e? e.value.trim() : ""; };
   const euro = n => "€ " + (Math.round(n*100)/100).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
   let formulaSel="TOP", scontoAttivo=null, righeCosti=[], totaleStr=euro(0);
   let societaLogoData=null, sporteam12LogoData=null;
@@ -253,14 +283,9 @@ const CONFIG = {
   function loadImageData(src){
     return new Promise((res,rej)=>{
       const img=new Image();
-      img.onload=()=>{
-        let dataURL=src;
-        if(!src.startsWith("data:")){
-          const c=document.createElement("canvas");c.width=img.naturalWidth;c.height=img.naturalHeight;
-          c.getContext("2d").drawImage(img,0,0);dataURL=c.toDataURL("image/png");
-        }
-        res({dataURL,w:img.naturalWidth,h:img.naturalHeight});
-      };
+      img.onload=()=>{ let dataURL=src;
+        if(!src.startsWith("data:")){const c=document.createElement("canvas");c.width=img.naturalWidth;c.height=img.naturalHeight;c.getContext("2d").drawImage(img,0,0);dataURL=c.toDataURL("image/png");}
+        res({dataURL,w:img.naturalWidth,h:img.naturalHeight}); };
       img.onerror=rej; img.src=src;
     });
   }
@@ -287,15 +312,20 @@ const CONFIG = {
 
   function nuovaRiga(sez){
     const div=document.createElement("div"); div.className="sa-riga";
+    const comuni=`<input type="text" class="nome" placeholder="Nome e cognome">
+      <input type="date" class="data" title="Data di nascita" aria-label="Data di nascita">
+      <input type="text" class="luogo" placeholder="Luogo di nascita">`;
     if(sez==="accompagnatori"){
-      div.innerHTML=`<input type="text" placeholder="Nome e cognome">
-        <input type="number" class="giorni" min="1" value="2" title="Giorni">
+      div.innerHTML=comuni+`
+        <input type="number" class="giorni" min="1" value="2" title="Giorni" aria-label="Giorni">
+        <input type="text" class="note" placeholder="Allergie / note">
         <button class="sa-del" title="Rimuovi">✕</button>`;
       div.querySelector(".giorni").addEventListener("input",calcola);
     } else {
-      div.innerHTML=`<input type="text" placeholder="Nome e cognome">
+      div.innerHTML=comuni+`
         <select class="camera"><option value="multipla">Camera multipla</option>
           <option value="singola">Camera singola (+${CONFIG.supplementoSingolaNotte}€/notte)</option></select>
+        <input type="text" class="note" placeholder="Allergie / note">
         <button class="sa-del" title="Rimuovi">✕</button>`;
       div.querySelector(".camera").addEventListener("change",calcola);
     }
@@ -313,6 +343,18 @@ const CONFIG = {
     else{scontoAttivo=null;msg.className="sa-codemsg err";msg.textContent="Codice non riconosciuto.";}
     calcola();
   });
+
+  function rosterDati(sezione, ruolo){
+    return [...$("#"+sezione).querySelectorAll(".sa-riga")].map(r=>{
+      const camera=r.querySelector(".camera"); const giorni=r.querySelector(".giorni");
+      return { ruolo,
+        nome:r.querySelector(".nome").value.trim(),
+        data:r.querySelector(".data").value.trim(),
+        luogo:r.querySelector(".luogo").value.trim(),
+        sist: camera ? (camera.value==="singola"?"Singola":"Multipla") : (giorni? giorni.value+" gg":""),
+        note:r.querySelector(".note").value.trim() };
+    });
+  }
 
   function calcola(){
     const f=CONFIG.formule[formulaSel];
@@ -356,46 +398,78 @@ const CONFIG = {
   }
 
   function slug(s){return (s||"squadra").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"squadra";}
-  function placeLogo(doc,logo,x,y,h,align){
-    if(!logo)return; let w=h*(logo.w/logo.h); if(w>48)w=48;
-    const fmt=logo.dataURL.startsWith("data:image/png")?"PNG":"JPEG";
-    doc.addImage(logo.dataURL,fmt,align==="right"?x-w:x,y,w,h);
-  }
+  function placeLogo(doc,logo,x,y,h,align){ if(!logo)return; let w=h*(logo.w/logo.h); if(w>46)w=46;
+    doc.addImage(logo.dataURL,logo.dataURL.startsWith("data:image/png")?"PNG":"JPEG",align==="right"?x-w:x,y,w,h); }
+
   function generaPDF(){
     if(!window.jspdf){alert("Generatore PDF non disponibile. Riprova.");return;}
     const {jsPDF}=window.jspdf; const doc=new jsPDF({unit:"mm",format:"a4"});
-    const W=210,m=15,lh=16; let y=14;
-    const nome=$("#societaNome").value.trim();
-    placeLogo(doc,sporteam12LogoData,m,y,lh,"left");
-    placeLogo(doc,societaLogoData,W-m,y,lh,"right");
-    y+=lh+8;
+    const W=210,m=15; let y=14;
+
+    placeLogo(doc,sporteam12LogoData,m,y,16,"left");
+    placeLogo(doc,societaLogoData,W-m,y,16,"right");
+    y+=24;
     doc.setFont("helvetica","bold");doc.setFontSize(16);doc.setTextColor(14,23,41);
-    doc.text("Warm Up Contest — 9ª edizione",W/2,y,{align:"center"});y+=7;
-    doc.setFont("helvetica","normal");doc.setFontSize(10.5);doc.setTextColor(90,99,122);
-    doc.text("Preventivo iscrizione · 2-4 ottobre 2026 · Tagliacozzo (AQ)",W/2,y,{align:"center"});y+=11;
-    doc.setTextColor(20,20,20);doc.setFontSize(12);doc.setFont("helvetica","bold");
-    doc.text("Società: "+(nome||"—"),m,y);
-    doc.setFont("helvetica","normal");doc.text("Formula: "+formulaSel,W-m,y,{align:"right"});y+=7;
-    doc.setDrawColor(220);doc.line(m,y,W-m,y);y+=8;
-    doc.setFontSize(11);
+    doc.text("Warm Up Contest — 9ª edizione · Scheda adesione",W/2,y,{align:"center"});y+=6;
+    doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(90,99,122);
+    doc.text("2-4 ottobre 2026 · Tagliacozzo (AQ)",W/2,y,{align:"center"});y+=10;
+
+    const cat=[val("categoria"),val("genere")].filter(Boolean).join(" ");
+    doc.setFontSize(11);doc.setTextColor(20,20,20);
+    doc.setFont("helvetica","bold");doc.text("Società: ",m,y);
+    doc.setFont("helvetica","normal");doc.text(val("societaNome")||"—",m+22,y);
+    doc.setFont("helvetica","bold");doc.text("Categoria: ",m+105,y);
+    doc.setFont("helvetica","normal");doc.text(cat||"—",m+130,y);
+    doc.setFont("helvetica","bold");doc.text("Formula: ",W-m-30,y);
+    doc.setFont("helvetica","normal");doc.text(formulaSel,W-m,y,{align:"right"});y+=7;
+
+    doc.setFontSize(10);doc.setTextColor(60,60,60);
+    const dir=[val("dirNome"),val("dirCell"),val("dirEmail")].filter(Boolean).join(" · ");
+    const tec=[val("tecNome"),val("tecCell"),val("tecEmail")].filter(Boolean).join(" · ");
+    doc.setFont("helvetica","bold");doc.text("Dirigente responsabile: ",m,y);
+    doc.setFont("helvetica","normal");doc.text(dir||"—",m+44,y);y+=5.5;
+    doc.setFont("helvetica","bold");doc.text("Tecnico: ",m,y);
+    doc.setFont("helvetica","normal");doc.text(tec||"—",m+18,y);y+=8;
+
+    const roster=[...rosterDati("atleti","Atleta"),...rosterDati("staff","Staff"),...rosterDati("accompagnatori","Accomp.")]
+      .filter(p=>p.nome||p.data||p.luogo||p.note);
+    if(roster.length && doc.autoTable){
+      doc.autoTable({
+        startY:y, theme:"grid",
+        head:[["Ruolo","Nome e cognome","Nascita","Luogo","Sistemazione","Note"]],
+        body:roster.map(p=>[p.ruolo,p.nome,p.data,p.luogo,p.sist,p.note]),
+        styles:{fontSize:8,cellPadding:1.6,textColor:[40,40,40],lineColor:[220,220,220]},
+        headStyles:{fillColor:[14,23,41],textColor:[255,255,255],fontStyle:"bold"},
+        margin:{left:m,right:m}
+      });
+      y=doc.lastAutoTable.finalY+8;
+    }
+
+    if(y>250){doc.addPage();y=20;}
+    doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(14,23,41);
+    doc.text("Riepilogo costi",m,y);y+=6;
+    doc.setFont("helvetica","normal");doc.setFontSize(10);
     (righeCosti.length?righeCosti:[{l:"Nessun partecipante inserito",a:euro(0)}]).forEach(it=>{
-      doc.setTextColor(45,45,45);doc.text(it.l,m,y);doc.text(it.a,W-m,y,{align:"right"});
-      y+=7; if(y>262){doc.addPage();y=20;}
+      doc.setTextColor(45,45,45);doc.text(it.l,m,y);doc.text(it.a,W-m,y,{align:"right"});y+=6;
+      if(y>270){doc.addPage();y=20;}
     });
-    y+=2;doc.setDrawColor(255,90,31);doc.line(m,y,W-m,y);y+=9;
-    doc.setFont("helvetica","bold");doc.setFontSize(15);doc.setTextColor(14,23,41);
-    doc.text("Totale",m,y);doc.text(totaleStr,W-m,y,{align:"right"});y+=12;
-    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(120,120,120);
-    doc.text("Quote comprensive di vitto e alloggio + tassa di soggiorno. Preventivo indicativo;",m,y);y+=4.5;
-    doc.text("il costo definitivo è confermato dall'organizzazione.",m,y);y+=7;
-    doc.text("Contatti: 320 4117503 · 328 5771602 · warmupcontest1@gmail.com · www.warmupeventi.it",m,y);
-    doc.save("preventivo-warmup-"+slug(nome)+".pdf");
+    y+=1;doc.setDrawColor(255,90,31);doc.line(m,y,W-m,y);y+=8;
+    doc.setFont("helvetica","bold");doc.setFontSize(14);doc.setTextColor(14,23,41);
+    doc.text("Totale",m,y);doc.text(totaleStr,W-m,y,{align:"right"});y+=14;
+
+    const oggi=new Date().toLocaleDateString("it-IT");
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(110,110,110);
+    doc.text("Data: "+oggi,m,y); doc.text("Timbro e firma _______________________",W-m,y,{align:"right"});y+=7;
+    doc.text("Quote comprensive di vitto e alloggio + tassa di soggiorno. Preventivo indicativo.",m,y);
+
+    doc.save("scheda-warmup-"+slug(val("societaNome"))+".pdf");
   }
 
   $("#stampa").addEventListener("click",generaPDF);
   $("#reset").addEventListener("click",()=>{
     ["atleti","staff","accompagnatori"].forEach(s=>$("#"+s).innerHTML="");
-    $("#codice").value="";$("#codemsg").textContent="";$("#u19open").checked=false;scontoAttivo=null;
+    ["societaNome","categoria","genere","dirNome","dirCell","dirEmail","tecNome","tecCell","tecEmail","codice"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+    $("#codemsg").textContent="";$("#u19open").checked=false;scontoAttivo=null;
     for(let i=0;i<10;i++)nuovaRiga("atleti"); nuovaRiga("staff"); nuovaRiga("accompagnatori"); calcola();
   });
 
