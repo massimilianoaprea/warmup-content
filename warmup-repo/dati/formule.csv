@@ -1,0 +1,4 @@
+nome,prezzo_atleta,prezzo_staff,descrizione,note
+TOP,175,150,"2 giorni pensione completa (cena venerdì → pranzo domenica) · Allenamento venerdì · Torneo · Premiazione · Gadget ufficiale","Assegnata fino a esaurimento spazi palestra"
+ELITE,135,110,"1 giorno pensione completa (pranzo sabato → pranzo domenica) · Allenamento sabato mattina · Torneo · Premiazione · Gadget ufficiale","Assegnata fino a esaurimento spazi palestra"
+MATCH,115,90,"1 giorno pensione completa (dalla cena del sabato) · Torneo · Premiazione · Gadget ufficiale",""

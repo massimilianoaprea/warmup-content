@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partecipare — Warm Up Contest</title>
+
+<!-- PapaParse: legge i CSV di Google in modo robusto (gestisce virgole, virgolette, ecc.) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+<!-- ============================================================
+     STILI SEGNAPOSTO
+     Questi stili servono solo a far vedere la pagina funzionante.
+     Quando la inserisci nel tuo sito, sostituiscili (o togli questo
+     blocco <style>) e usa il foglio di stile del tuo sito.
+     ============================================================ -->
+<style>
+  :root{
+    --blu:#0b3d91; --blu-chiaro:#1565c0; --giallo:#f4b400;
+    --testo:#1a1a1a; --grigio:#5b6470; --bordo:#e3e7ee; --sfondo:#f7f9fc;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    color:var(--testo); background:var(--sfondo); line-height:1.55;
+  }
+  .wrap{max-width:980px; margin:0 auto; padding:24px 20px 64px;}
+
+  header.hero{text-align:center; padding:40px 16px 24px;}
+  header.hero .eyebrow{
+    display:inline-block; font-size:.8rem; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--blu-chiaro); font-weight:700; margin-bottom:10px;
+  }
+  header.hero h1{margin:.1em 0; font-size:clamp(2rem,6vw,3.2rem); color:var(--blu); line-height:1.05;}
+  header.hero .meta{color:var(--grigio); font-size:1.05rem; margin-top:8px;}
+  header.hero .badge{
+    display:inline-block; margin-top:14px; background:var(--giallo); color:#3a2c00;
+    font-weight:700; font-size:.85rem; padding:6px 14px; border-radius:999px;
+  }
+
+  .intro{font-size:1.12rem; color:#2b313a; max-width:70ch; margin:8px auto 36px;}
+
+  h2{font-size:1.35rem; color:var(--blu); margin:40px 0 14px; padding-bottom:8px; border-bottom:2px solid var(--bordo);}
+
+  .categorie{display:flex; flex-wrap:wrap; gap:10px; padding:0; list-style:none; margin:0;}
+  .categorie li{
+    background:#fff; border:1px solid var(--bordo); border-radius:10px;
+    padding:10px 14px; min-width:0;
+  }
+  .categorie .cat{font-weight:700;}
+  .categorie .gen{color:var(--grigio); font-size:.9rem;}
+
+  .formule{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-top:6px;}
+  .formula{
+    background:#fff; border:1px solid var(--bordo); border-radius:14px; padding:20px;
+    display:flex; flex-direction:column;
+  }
+  .formula h3{margin:0 0 6px; font-size:1.25rem; color:var(--blu);}
+  .formula .prezzo{font-size:1.6rem; font-weight:800; color:var(--blu-chiaro); margin:4px 0 10px;}
+  .formula p{margin:0 0 10px; color:#333;}
+  .formula .note{margin-top:auto; font-size:.85rem; color:var(--grigio);}
+
+  .nota-box{
+    background:#fff; border:1px solid var(--bordo); border-left:4px solid var(--giallo);
+    border-radius:10px; padding:16px 18px; margin-top:18px; color:#333;
+  }
+
+  /* Avviso che indica se i dati sono di esempio o dal foglio reale */
+  .stato{
+    font-size:.82rem; text-align:center; color:var(--grigio);
+    margin-top:40px; padding-top:16px; border-top:1px dashed var(--bordo);
+  }
+  .stato.live{color:#137333;}
+  .stato.errore{color:#b00020;}
+
+  @media (prefers-reduced-motion: no-preference){
+    .formula, .categorie li{transition:transform .15s ease, box-shadow .15s ease;}
+    .formula:hover{transform:translateY(-2px); box-shadow:0 6px 20px rgba(11,61,145,.08);}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hero">
+    <span class="eyebrow" id="edizione">…</span>
+    <h1 id="titolo">…</h1>
+    <div class="meta"><span id="date">…</span> · <span id="luogo">…</span></div>
+    <span class="badge" id="riconoscimento" hidden></span>
+  </header>
+
+  <p class="intro" id="intro">…</p>
+
+  <h2>Categorie ammesse</h2>
+  <ul class="categorie" id="categorie"></ul>
+
+  <h2>Formule di partecipazione</h2>
+  <div class="formule" id="formule"></div>
+
+  <div class="nota-box" id="note" hidden></div>
+
+  <p class="stato" id="stato">Caricamento contenuti…</p>
+</div>
+
+<script>
+/* ================================================================
+   CONFIGURAZIONE — l'unica parte da toccare
+   Incolla qui i link CSV "Pubblica sul web" di ciascuna scheda
+   del tuo foglio Google (istruzioni nella chat).
+   Finché restano vuoti "", la pagina mostra i dati di esempio.
+   ================================================================ */
+const CONFIG = {
+  csv: {
+    testi:      "",   // <-- link CSV della scheda "testi"
+    formule:    "",   // <-- link CSV della scheda "formule"
+    categorie:  ""    // <-- link CSV della scheda "categorie"
+  }
+};
+
+/* ----- Dati di esempio (usati finché i link sopra sono vuoti) ----- */
+const SAMPLE = {
+  testi: [
+    {chiave:"titolo", valore:"Warm Up Contest"},
+    {chiave:"edizione", valore:"9ª edizione"},
+    {chiave:"date", valore:"2-4 ottobre 2026"},
+    {chiave:"luogo", valore:"Villaggio dello Sport, Tagliacozzo (AQ)"},
+    {chiave:"intro", valore:"Questo è un testo di esempio. Collega il foglio Google per mostrare i contenuti reali."},
+    {chiave:"riconoscimento", valore:"Torneo riconosciuto FIPAV"},
+    {chiave:"note", valore:"Nota di esempio: qui andranno scadenze iscrizioni, requisiti e contatti."}
+  ],
+  formule: [
+    {nome:"TOP",   descrizione:"Descrizione di esempio della formula TOP.",   prezzo:"€ —", note:"Esempio"},
+    {nome:"ELITE", descrizione:"Descrizione di esempio della formula ELITE.", prezzo:"€ —", note:"Esempio"},
+    {nome:"MATCH", descrizione:"Descrizione di esempio della formula MATCH.", prezzo:"€ —", note:"Esempio"}
+  ],
+  categorie: [
+    {categoria:"Under 19", genere:"Maschile/Femminile"},
+    {categoria:"1ª Divisione", genere:"Maschile/Femminile"},
+    {categoria:"2ª Divisione", genere:"Maschile/Femminile"},
+    {categoria:"Serie D", genere:"Maschile/Femminile"},
+    {categoria:"Serie C", genere:"Maschile/Femminile"}
+  ]
+};
+
+/* ----- Lettura di un CSV pubblicato da Google ----- */
+function loadCsv(url){
+  return new Promise((resolve, reject)=>{
+    Papa.parse(url, {
+      download:true, header:true, skipEmptyLines:true,
+      complete: res => resolve(res.data),
+      error: err => reject(err)
+    });
+  });
+}
+
+async function getData(key){
+  const url = CONFIG.csv[key];
+  if(!url) return {data: SAMPLE[key], live:false};
+  try{
+    const data = await loadCsv(url);
+    if(!data || !data.length) throw new Error("foglio vuoto");
+    return {data, live:true};
+  }catch(e){
+    console.error("Errore lettura scheda '"+key+"':", e);
+    return {data: SAMPLE[key], live:false, errore:true};
+  }
+}
+
+const el = id => document.getElementById(id);
+const safe = v => (v==null ? "" : String(v).trim());
+
+function renderTesti(rows){
+  const t = Object.fromEntries(rows.map(r => [safe(r.chiave), safe(r.valore)]));
+  el("titolo").textContent   = t.titolo   || "Warm Up Contest";
+  el("edizione").textContent = t.edizione || "";
+  el("date").textContent     = t.date     || "";
+  el("luogo").textContent    = t.luogo    || "";
+  el("intro").textContent    = t.intro    || "";
+  if(t.riconoscimento){ const b=el("riconoscimento"); b.textContent=t.riconoscimento; b.hidden=false; }
+  if(t.note){ const n=el("note"); n.textContent=t.note; n.hidden=false; }
+  document.title = (t.titolo||"Warm Up Contest") + " — Partecipare";
+}
+
+function renderCategorie(rows){
+  el("categorie").innerHTML = rows
+    .filter(r => safe(r.categoria))
+    .map(r => `<li><span class="cat">${safe(r.categoria)}</span>`
+              + (safe(r.genere) ? ` <span class="gen">· ${safe(r.genere)}</span>` : ``)
+              + `</li>`)
+    .join("");
+}
+
+function renderFormule(rows){
+  el("formule").innerHTML = rows
+    .filter(r => safe(r.nome))
+    .map(r => `<article class="formula">
+        <h3>${safe(r.nome)}</h3>
+        ${safe(r.prezzo) ? `<div class="prezzo">${safe(r.prezzo)}</div>` : ``}
+        ${safe(r.descrizione) ? `<p>${safe(r.descrizione)}</p>` : ``}
+        ${safe(r.note) ? `<div class="note">${safe(r.note)}</div>` : ``}
+      </article>`)
+    .join("");
+}
+
+(async function init(){
+  const [testi, formule, categorie] = await Promise.all([
+    getData("testi"), getData("formule"), getData("categorie")
+  ]);
+
+  renderTesti(testi.data);
+  renderCategorie(categorie.data);
+  renderFormule(formule.data);
+
+  const anyLive   = testi.live || formule.live || categorie.live;
+  const anyErrore = testi.errore || formule.errore || categorie.errore;
+  const stato = el("stato");
+  if(anyErrore){
+    stato.className = "stato errore";
+    stato.textContent = "Non sono riuscito a leggere il foglio Google: controlla che sia pubblicato e che i link siano corretti. Intanto vedi i dati di esempio.";
+  }else if(anyLive){
+    stato.className = "stato live";
+    stato.textContent = "Contenuti aggiornati dal foglio Google.";
+  }else{
+    stato.className = "stato";
+    stato.textContent = "Dati di esempio — incolla i link del foglio Google nella sezione CONFIG per mostrare i contenuti reali.";
+  }
+})();
+</script>
+</body>
+</html>

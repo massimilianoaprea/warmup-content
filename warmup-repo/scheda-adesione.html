@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scheda adesione — Calcolo costi | Warm Up Contest</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --blu:#0b3d91; --blu2:#1565c0; --giallo:#f4b400; --wa:#25D366;
+    --testo:#1a1a1a; --grigio:#5b6470; --bordo:#e3e7ee; --sfondo:#f7f9fc; --ok:#137333; --err:#b00020; --warn:#9a6700;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--testo);background:var(--sfondo);line-height:1.5;}
+  .wrap{max-width:920px;margin:0 auto;padding:24px 18px 80px;}
+  h1{color:var(--blu);font-size:clamp(1.6rem,4vw,2.3rem);margin:.2em 0;}
+  h2{color:var(--blu);font-size:1.15rem;border-bottom:2px solid var(--bordo);padding-bottom:6px;margin:28px 0 12px;}
+  .sub{color:var(--grigio);margin-top:0;}
+  .card{background:#fff;border:1px solid var(--bordo);border-radius:12px;padding:18px;}
+  button{font:inherit;cursor:pointer;border:none;border-radius:10px;padding:11px 18px;background:var(--blu);color:#fff;font-weight:700;}
+  button.ghost{background:#fff;color:var(--blu);border:1px solid var(--bordo);font-weight:600;}
+  button:hover{filter:brightness(1.05);}
+  label{font-weight:600;}
+
+  #gate{max-width:420px;margin:8vh auto;text-align:center;}
+  #gate input{width:100%;padding:12px;font-size:1.05rem;border:1px solid var(--bordo);border-radius:10px;margin:12px 0;text-align:center;letter-spacing:.06em;}
+  #gate .msg{color:var(--err);min-height:1.2em;font-size:.9rem;}
+
+  .wa-cta{display:inline-flex;align-items:center;gap:7px;background:var(--wa);color:#fff;font-weight:700;text-decoration:none;padding:9px 16px;border-radius:999px;margin:6px 0 2px;}
+  .wa-cta:hover{filter:brightness(.96);}
+
+  .riepilogo-bar{
+    position:sticky; top:0; z-index:50; background:#fff;
+    border:1px solid var(--bordo); border-top:none; border-radius:0 0 14px 14px;
+    box-shadow:0 6px 18px rgba(11,61,145,.10); padding:12px 16px; margin:0 0 12px;
+  }
+  .bar-top{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .bar-total{font-size:1rem;color:var(--grigio);}
+  .bar-total strong{font-size:1.7rem;color:var(--blu);font-variant-numeric:tabular-nums;margin-left:6px;}
+  .dettaglio-toggle{background:#fff;color:var(--blu);border:1px solid var(--bordo);font-weight:600;padding:8px 12px;font-size:.85rem;border-radius:8px;}
+  #dettaglio{max-height:40vh;overflow:auto;margin-top:12px;}
+
+  .field{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .field input[type=text]{padding:9px;border:1px solid var(--bordo);border-radius:8px;min-width:220px;flex:1;}
+  #logoPreview{max-height:52px;margin-top:10px;border:1px solid var(--bordo);border-radius:6px;padding:4px;background:#fff;display:none;}
+
+  .formule{display:flex;gap:10px;flex-wrap:wrap;}
+  .formule label{flex:1 1 200px;border:1px solid var(--bordo);border-radius:10px;padding:12px;cursor:pointer;background:#fff;}
+  .formule label.sel{border-color:var(--blu2);box-shadow:0 0 0 2px rgba(21,101,192,.15);}
+  .formule .pz{display:block;color:var(--blu2);font-weight:700;margin-top:4px;font-size:.95rem;}
+  .formule .desc{display:block;color:var(--grigio);font-size:.8rem;margin-top:6px;}
+
+  .riga{display:grid;grid-template-columns:1.6fr auto auto;gap:8px;align-items:center;margin-bottom:8px;}
+  .riga input[type=text]{padding:9px;border:1px solid var(--bordo);border-radius:8px;width:100%;}
+  .riga input[type=number]{padding:9px;border:1px solid var(--bordo);border-radius:8px;width:90px;}
+  .riga select{padding:9px;border:1px solid var(--bordo);border-radius:8px;}
+  .riga .del{background:#fff;color:var(--err);border:1px solid var(--bordo);padding:8px 10px;font-weight:700;}
+  .addbtn{background:#fff;color:var(--blu);border:1px dashed var(--blu2);font-weight:600;margin-top:4px;}
+  .hint{font-size:.82rem;color:var(--grigio);margin:2px 0 10px;}
+  .warn{color:var(--warn);font-size:.85rem;margin-top:6px;}
+
+  .opt{display:flex;gap:10px;align-items:flex-start;margin:10px 0;}
+  .codemsg{font-size:.9rem;margin-top:6px;}
+  .codemsg.ok{color:var(--ok);} .codemsg.err{color:var(--err);}
+
+  table.tot{width:100%;border-collapse:collapse;}
+  table.tot td{padding:6px 0;border-bottom:1px dashed var(--bordo);}
+  table.tot td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  table.tot tr:last-child td{border-bottom:none;}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="gate" class="card">
+    <h1>Area riservata</h1>
+    <p class="sub">La scheda adesione è riservata alle società <strong>iscritte e confermate</strong>. Inserisci il codice ricevuto via email.</p>
+    <input id="code" type="text" placeholder="Codice di accesso" autocomplete="off">
+    <button id="enter">Entra</button>
+    <p class="msg" id="gatemsg"></p>
+  </section>
+
+  <main id="app" class="hidden">
+    <h1>Scheda adesione — 9ª edizione</h1>
+    <p class="sub">2-4 ottobre 2026 · Tagliacozzo (AQ). Inserisci i partecipanti: il costo si aggiorna in tempo reale.</p>
+    <a class="wa-cta" id="waCta" href="#" target="_blank" rel="noopener">💬 Scrivici su WhatsApp</a>
+
+    <div class="riepilogo-bar">
+      <div class="bar-top">
+        <button type="button" class="dettaglio-toggle" id="toggleDett" aria-expanded="false">Dettaglio ▾</button>
+        <div class="bar-total">Totale <strong id="barTotale">€ 0,00</strong></div>
+      </div>
+      <div id="dettaglio" hidden><table class="tot" id="riepilogo"></table></div>
+    </div>
+
+    <h2>Società</h2>
+    <div class="card">
+      <div class="field"><label for="societaNome">Nome società</label>
+        <input id="societaNome" type="text" placeholder="Denominazione società / A.S.D."></div>
+      <div class="field" style="margin-top:12px;"><label for="societaLogo">Logo società</label>
+        <input id="societaLogo" type="file" accept="image/*"></div>
+      <img id="logoPreview" alt="Anteprima logo società">
+    </div>
+
+    <h2>1. Formula</h2>
+    <div class="formule" id="formule"></div>
+
+    <h2>2. Atleti</h2>
+    <p class="hint">Minimo 10 atleti per squadra. Camera singola: supplemento di €15/notte.</p>
+    <div id="atleti"></div>
+    <button class="addbtn" data-add="atleti">+ Aggiungi atleta</button>
+    <p class="warn hidden" id="warnAtleti">⚠ Servono almeno 10 atleti per squadra.</p>
+
+    <h2>3. Allenatori / Dirigenti</h2>
+    <p class="hint">Tariffa ridotta secondo la formula scelta.</p>
+    <div id="staff"></div>
+    <button class="addbtn" data-add="staff">+ Aggiungi allenatore/dirigente</button>
+
+    <h2>4. Accompagnatori</h2>
+    <p class="hint">Non tesserati: €75,00 al giorno (strutture convenzionate).</p>
+    <div id="accompagnatori"></div>
+    <button class="addbtn" data-add="accompagnatori">+ Aggiungi accompagnatore</button>
+
+    <h2>5. Supplementi e sconti</h2>
+    <div class="card" style="margin-bottom:14px;">
+      <label class="opt">
+        <input type="checkbox" id="u19open">
+        <span>Iscrizione combinata <strong>U19 + Open</strong> (+€15 per atleta)</span>
+      </label>
+      <div class="field" style="margin-top:10px;">
+        <label for="codice">Codice sconto</label>
+        <input id="codice" type="text" placeholder="(facoltativo)" autocomplete="off">
+        <button class="ghost" id="applica">Applica</button>
+      </div>
+      <div class="codemsg" id="codemsg"></div>
+      <p class="hint" style="margin-top:10px;">Gratuità calcolata in automatico: 1 ogni 20 partecipanti iscritti.</p>
+    </div>
+
+    <p style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button id="stampa">⬇ Salva preventivo (PDF)</button>
+      <button class="ghost" id="reset">Azzera</button>
+    </p>
+    <p class="sub" style="font-size:.85rem;">Quote comprensive di vitto e alloggio + tassa di soggiorno. Preventivo indicativo; il costo definitivo è confermato dall'organizzazione.</p>
+  </main>
+</div>
+
+<script>
+/* ================= CONFIGURAZIONE ================= */
+const CONFIG = {
+  accesso: "WUC2026",
+  whatsapp: "https://wa.me/393204117503",   // <-- sostituisci con il link del CANALE WhatsApp
+  sporteam12Logo: "loghi/sporteam12.png",
+  accompagnatoreGiorno: 75,
+  supplementoSingolaNotte: 15,
+  supplementoU19OpenAtleta: 15,
+  gratuitaOgni: 20,
+  minAtleti: 10,
+  formule: {
+    TOP:   { atleta:175, staff:150, notti:2, desc:"2 gg pensione completa (cena ven → pranzo dom) · Allenamento ven" },
+    ELITE: { atleta:135, staff:110, notti:1, desc:"1 g pensione completa (pranzo sab → pranzo dom) · Allenamento sab mattina" },
+    MATCH: { atleta:115, staff:90,  notti:1, desc:"1 g pensione completa (dalla cena del sab)" }
+  },
+  sconti: {
+    BENVENUTO: { tipo:"perc",     valore:10, descrizione:"Prima iscrizione assoluta" },
+    SECONDA:   { tipo:"gratuita", valore:1,  descrizione:"Seconda squadra iscritta" }
+  }
+};
+
+const $ = s => document.querySelector(s);
+const euro = n => "€ " + (Math.round(n*100)/100).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
+let formulaSel = "TOP", scontoAttivo = null;
+let righeCosti = [], totaleStr = euro(0);
+let societaLogoData = null, sporteam12LogoData = null;
+
+/* ---- accesso ---- */
+$("#enter").addEventListener("click", tentaAccesso);
+$("#code").addEventListener("keydown", e => { if(e.key==="Enter") tentaAccesso(); });
+function tentaAccesso(){
+  if($("#code").value.trim().toUpperCase() === CONFIG.accesso.toUpperCase()){
+    $("#gate").classList.add("hidden"); $("#app").classList.remove("hidden");
+  } else { $("#gatemsg").textContent = "Codice non valido."; }
+}
+
+/* ---- WhatsApp CTA ---- */
+$("#waCta").href = CONFIG.whatsapp;
+
+/* ---- dettaglio toggle ---- */
+$("#toggleDett").addEventListener("click", ()=>{
+  const d = $("#dettaglio"), apri = d.hidden;
+  d.hidden = !apri;
+  $("#toggleDett").setAttribute("aria-expanded", String(apri));
+  $("#toggleDett").textContent = apri ? "Dettaglio ▴" : "Dettaglio ▾";
+});
+
+/* ---- caricamento immagini -> {dataURL,w,h} ---- */
+function loadImageData(src){
+  return new Promise((res,rej)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      let dataURL = src;
+      if(!src.startsWith("data:")){
+        const c=document.createElement("canvas"); c.width=img.naturalWidth; c.height=img.naturalHeight;
+        c.getContext("2d").drawImage(img,0,0);
+        dataURL = c.toDataURL("image/png");
+      }
+      res({dataURL, w:img.naturalWidth, h:img.naturalHeight});
+    };
+    img.onerror = rej;
+    img.src = src;
+  });
+}
+/* precarica il logo Sporteam12 (se presente) */
+loadImageData(CONFIG.sporteam12Logo).then(d=>sporteam12LogoData=d).catch(()=>{ sporteam12LogoData=null; });
+
+/* logo società da upload */
+$("#societaLogo").addEventListener("change", e=>{
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async ()=>{
+    try{
+      societaLogoData = await loadImageData(reader.result);
+      const p=$("#logoPreview"); p.src=societaLogoData.dataURL; p.style.display="inline-block";
+    }catch(err){ console.error(err); }
+  };
+  reader.readAsDataURL(file);
+});
+
+/* ---- formule ---- */
+function renderFormule(){
+  $("#formule").innerHTML = Object.entries(CONFIG.formule).map(([nome,f])=>`
+    <label class="${nome===formulaSel?'sel':''}">
+      <input type="radio" name="formula" value="${nome}" ${nome===formulaSel?'checked':''}>
+      <strong>${nome}</strong>
+      <span class="pz">${euro(f.atleta)} atleta · ${euro(f.staff)} staff</span>
+      <span class="desc">${f.desc} · ${f.notti} ${f.notti===1?'notte':'notti'}</span>
+    </label>`).join("");
+  document.querySelectorAll('input[name=formula]').forEach(r=>{
+    r.addEventListener("change", e=>{ formulaSel=e.target.value; renderFormule(); calcola(); });
+  });
+}
+
+/* ---- righe partecipanti ---- */
+function nuovaRiga(sezione){
+  const div = document.createElement("div");
+  div.className = "riga";
+  if(sezione==="accompagnatori"){
+    div.innerHTML = `
+      <input type="text" placeholder="Nome e cognome">
+      <input type="number" class="giorni" min="1" value="2" title="Giorni">
+      <button class="del" title="Rimuovi">✕</button>`;
+    div.querySelector(".giorni").addEventListener("input", calcola);
+  } else {
+    div.innerHTML = `
+      <input type="text" placeholder="Nome e cognome">
+      <select class="camera">
+        <option value="multipla">Camera multipla</option>
+        <option value="singola">Camera singola (+${CONFIG.supplementoSingolaNotte}€/notte)</option>
+      </select>
+      <button class="del" title="Rimuovi">✕</button>`;
+    div.querySelector(".camera").addEventListener("change", calcola);
+  }
+  div.querySelector(".del").addEventListener("click", ()=>{ div.remove(); calcola(); });
+  $("#"+sezione).appendChild(div);
+}
+document.querySelectorAll("[data-add]").forEach(b=>{
+  b.addEventListener("click", ()=>{ nuovaRiga(b.dataset.add); calcola(); });
+});
+
+$("#u19open").addEventListener("change", calcola);
+$("#applica").addEventListener("click", ()=>{
+  const code = $("#codice").value.trim().toUpperCase(), msg = $("#codemsg");
+  if(!code){ scontoAttivo=null; msg.textContent=""; calcola(); return; }
+  const s = CONFIG.sconti[code];
+  if(s){ scontoAttivo={codice:code,...s}; msg.className="codemsg ok"; msg.textContent=`Codice "${code}" applicato — ${s.descrizione}.`; }
+  else { scontoAttivo=null; msg.className="codemsg err"; msg.textContent="Codice non riconosciuto."; }
+  calcola();
+});
+
+/* ---- calcolo ---- */
+function calcola(){
+  const f = CONFIG.formule[formulaSel];
+  const atleti = $("#atleti").querySelectorAll(".riga");
+  const staff  = $("#staff").querySelectorAll(".riga");
+  const acc    = $("#accompagnatori").querySelectorAll(".riga");
+  const nAtleti = atleti.length, nStaff = staff.length, nAcc = acc.length;
+
+  let singoleAtleti=0; atleti.forEach(r=>{ if(r.querySelector(".camera").value==="singola") singoleAtleti++; });
+  let singoleStaff=0;  staff.forEach(r=>{ if(r.querySelector(".camera").value==="singola") singoleStaff++; });
+  const nSingole = singoleAtleti + singoleStaff;
+
+  const baseAtleti = nAtleti * f.atleta;
+  const baseStaff  = nStaff  * f.staff;
+  let baseAcc = 0; acc.forEach(r=>{ baseAcc += CONFIG.accompagnatoreGiorno * Math.max(1, parseInt(r.querySelector(".giorni").value||"1",10)); });
+
+  const supplSingola = nSingole * CONFIG.supplementoSingolaNotte * f.notti;
+  const supplU19Open = $("#u19open").checked ? nAtleti * CONFIG.supplementoU19OpenAtleta : 0;
+
+  const totPartecipanti = nAtleti + nStaff + nAcc;
+  let gratuita = Math.floor(totPartecipanti / CONFIG.gratuitaOgni);
+  let scontoCodice = 0, scontoLabel = "";
+  if(scontoAttivo){
+    if(scontoAttivo.tipo==="gratuita") gratuita += scontoAttivo.valore;
+    else if(scontoAttivo.tipo==="perc"){ scontoLabel = scontoAttivo.valore+"%"; }
+    else if(scontoAttivo.tipo==="fisso"){ scontoCodice = scontoAttivo.valore; scontoLabel = euro(scontoAttivo.valore); }
+  }
+  const scontoGratuita = gratuita * f.atleta;
+
+  let subtotale = baseAtleti + baseStaff + baseAcc + supplSingola + supplU19Open - scontoGratuita;
+  if(scontoAttivo && scontoAttivo.tipo==="perc"){ scontoCodice = subtotale * scontoAttivo.valore/100; }
+  let totale = subtotale - scontoCodice;
+  if(totale < 0) totale = 0;
+
+  righeCosti = [];
+  if(nAtleti) righeCosti.push({label:`${nAtleti} atleti × ${euro(f.atleta)} (${formulaSel})`, amount:euro(baseAtleti)});
+  if(nStaff)  righeCosti.push({label:`${nStaff} allenatori/dirigenti × ${euro(f.staff)}`, amount:euro(baseStaff)});
+  if(nAcc)    righeCosti.push({label:`${nAcc} accompagnatori × ${euro(CONFIG.accompagnatoreGiorno)}/giorno`, amount:euro(baseAcc)});
+  if(supplSingola>0) righeCosti.push({label:`Supplemento ${nSingole} camera/e singola/e (${f.notti} ${f.notti===1?'notte':'notti'})`, amount:euro(supplSingola)});
+  if(supplU19Open>0) righeCosti.push({label:`Supplemento U19 + Open (${nAtleti} atleti × €15)`, amount:euro(supplU19Open)});
+  if(scontoGratuita>0) righeCosti.push({label:`${gratuita} gratuità (1 ogni ${CONFIG.gratuitaOgni})`, amount:`− ${euro(scontoGratuita)}`});
+  if(scontoCodice>0) righeCosti.push({label:`Sconto codice ${scontoAttivo.codice} (${scontoLabel})`, amount:`− ${euro(scontoCodice)}`});
+  totaleStr = euro(totale);
+
+  $("#riepilogo").innerHTML = (righeCosti.length ? righeCosti : [{label:"Nessun partecipante inserito", amount:euro(0)}])
+    .map(it=>`<tr><td>${it.label}</td><td>${it.amount}</td></tr>`).join("");
+  $("#barTotale").textContent = totaleStr;
+  $("#warnAtleti").classList.toggle("hidden", !(nAtleti>0 && nAtleti<CONFIG.minAtleti));
+}
+
+/* ---- generazione PDF ---- */
+function slug(s){ return (s||"squadra").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "squadra"; }
+function placeLogo(doc, logo, x, y, h, align){
+  if(!logo) return;
+  let ratio = logo.w/logo.h, w = h*ratio;
+  const maxW = 48; if(w>maxW){ w=maxW; }
+  const fmt = logo.dataURL.startsWith("data:image/png") ? "PNG" : "JPEG";
+  const drawX = align==="right" ? x - w : x;
+  doc.addImage(logo.dataURL, fmt, drawX, y, w, h);
+}
+function generaPDF(){
+  if(!window.jspdf){ alert("Generatore PDF non caricato. Controlla la connessione e riprova."); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:"mm", format:"a4"});
+  const pageW = 210, margin = 15, logoH = 16;
+  let y = 14;
+  const nome = $("#societaNome").value.trim();
+
+  placeLogo(doc, sporteam12LogoData, margin, y, logoH, "left");
+  placeLogo(doc, societaLogoData, pageW - margin, y, logoH, "right");
+  y += logoH + 8;
+
+  doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.setTextColor(11,61,145);
+  doc.text("Warm Up Contest — 9ª edizione", pageW/2, y, {align:"center"}); y+=7;
+  doc.setFont("helvetica","normal"); doc.setFontSize(10.5); doc.setTextColor(90,100,112);
+  doc.text("Preventivo iscrizione · 2-4 ottobre 2026 · Tagliacozzo (AQ)", pageW/2, y, {align:"center"}); y+=11;
+
+  doc.setTextColor(26,26,26); doc.setFontSize(12); doc.setFont("helvetica","bold");
+  doc.text("Società: " + (nome || "—"), margin, y);
+  doc.setFont("helvetica","normal");
+  doc.text("Formula: " + formulaSel, pageW - margin, y, {align:"right"}); y+=7;
+
+  doc.setDrawColor(220); doc.line(margin, y, pageW-margin, y); y+=8;
+
+  doc.setFontSize(11);
+  (righeCosti.length ? righeCosti : [{label:"Nessun partecipante inserito", amount:euro(0)}]).forEach(it=>{
+    doc.setTextColor(45,45,45);
+    doc.text(it.label, margin, y);
+    doc.text(it.amount, pageW-margin, y, {align:"right"});
+    y+=7;
+    if(y>262){ doc.addPage(); y=20; }
+  });
+
+  y+=2; doc.setDrawColor(170); doc.line(margin, y, pageW-margin, y); y+=9;
+  doc.setFont("helvetica","bold"); doc.setFontSize(15); doc.setTextColor(11,61,145);
+  doc.text("Totale", margin, y); doc.text(totaleStr, pageW-margin, y, {align:"right"}); y+=12;
+
+  doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(120,120,120);
+  doc.text("Quote comprensive di vitto e alloggio + tassa di soggiorno. Preventivo indicativo;", margin, y); y+=4.5;
+  doc.text("il costo definitivo è confermato dall'organizzazione.", margin, y); y+=7;
+  doc.text("Contatti: 320 4117503 · 328 5771602 · warmupcontest1@gmail.com · www.warmupeventi.it", margin, y);
+
+  doc.save("preventivo-warmup-" + slug(nome) + ".pdf");
+}
+
+/* ---- reset / stampa ---- */
+$("#reset").addEventListener("click", ()=>{
+  ["atleti","staff","accompagnatori"].forEach(s=>{ $("#"+s).innerHTML=""; });
+  $("#codice").value=""; $("#codemsg").textContent=""; $("#u19open").checked=false; scontoAttivo=null;
+  for(let i=0;i<10;i++) nuovaRiga("atleti");
+  nuovaRiga("staff"); nuovaRiga("accompagnatori");
+  calcola();
+});
+$("#stampa").addEventListener("click", generaPDF);
+
+/* ---- avvio ---- */
+renderFormule();
+for(let i=0;i<10;i++) nuovaRiga("atleti");
+nuovaRiga("staff"); nuovaRiga("accompagnatori");
+calcola();
+</script>
+</body>
+</html>
