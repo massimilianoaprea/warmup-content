@@ -48,7 +48,12 @@
   .sa .frow>*{flex:1 1 180px;min-width:0}
   .sa label{font-weight:600;color:#cfd8ea;font-size:.95rem}
   .sa .hint{font-family:var(--mono);font-size:.74rem;letter-spacing:.04em;color:#8e9ab4;margin:6px 0 14px}
-  #logoPreview{max-height:54px;border:1px solid var(--line);border-radius:6px;padding:5px;background:#fff;display:none}
+  .sa-logobox{flex:0 0 auto;width:72px;height:52px;border:1px dashed #c9d2e3;border-radius:6px;
+    display:grid;place-items:center;background:#fff;overflow:hidden;position:relative}
+  .sa-logobox .ph{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:#7a8499}
+  .sa-logobox img{width:100%;height:100%;object-fit:contain;padding:4px;display:none}
+  .sa-logobox.filled img{display:block}
+  .sa-logobox.filled .ph{display:none}
 
   .sa-formule{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
   .sa-formula{position:relative;border:1px solid var(--line);border-radius:var(--radius-lg);padding:16px;cursor:pointer;background:var(--ink-3)}
@@ -131,11 +136,14 @@
       <div class="sa-card">
         <h3>Società</h3>
         <span class="grouplabel">Denominazione e logo</span>
-        <div class="frow">
-          <input id="societaNome" type="text" placeholder="Denominazione società / A.S.D." style="flex:2 1 240px">
-          <input id="societaLogo" type="file" accept="image/*" aria-label="Logo società">
+        <div class="frow" style="align-items:center">
+          <input id="societaNome" type="text" placeholder="Denominazione società / A.S.D." style="flex:2 1 220px">
+          <input id="societaLogo" type="file" accept="image/*" aria-label="Logo società" style="flex:1 1 180px">
+          <div class="sa-logobox" id="logoBox" title="Logo società">
+            <img id="logoPreview" alt="Logo società">
+            <span class="ph">Logo</span>
+          </div>
         </div>
-        <div style="margin-top:10px"><img id="logoPreview" alt="Anteprima logo società"></div>
 
         <span class="grouplabel">Categoria</span>
         <div class="frow">
@@ -295,7 +303,7 @@ const CONFIG = {
     const file=e.target.files[0]; if(!file) return;
     const r=new FileReader();
     r.onload=async()=>{ try{ societaLogoData=await loadImageData(r.result);
-      const p=$("#logoPreview"); p.src=societaLogoData.dataURL; p.style.display="inline-block"; }catch(_){} };
+      $("#logoPreview").src=societaLogoData.dataURL; $("#logoBox").classList.add("filled"); }catch(_){} };
     r.readAsDataURL(file);
   });
 
