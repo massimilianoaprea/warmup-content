@@ -1,2 +1,0 @@
-Crea una cartella per ogni anno (2022, 2023, ...) e mettici le foto.
-Poi:  node scripts/genera-galleria.mjs   per aggiornare galleria.json
